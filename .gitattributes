@@ -1,0 +1,26 @@
+# Default behavior: let Git auto-detect text files
+* text=auto
+
+# Force Unity text and YAML files to use LF (Linux-style) line endings consistently
+*.cs text diff=csharp eol=lf
+*.cginc text eol=lf
+*.shader text eol=lf
+*.mat text eol=lf
+*.anim text eol=lf
+*.unity text eol=lf
+*.prefab text eol=lf
+*.physicsMaterial2D text eol=lf
+*.physicsMaterial text eol=lf
+*.asset text eol=lf
+*.meta text eol=lf
+*.controller text eol=lf
+
+# Keep binary files completely untouched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.fbx binary
+*.obj binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
