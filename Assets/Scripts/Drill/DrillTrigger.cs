@@ -74,4 +74,17 @@ public class DrillTrigger : MonoBehaviour
             drillAudioSource.Stop();
         }
     }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (isSpinning && other.TryGetComponent<IDrillable>(out var drillableTarget))
+        {
+            drillableTarget.ProgressDrilling(Time.deltaTime);
+            
+            if (activeInteractor != null)
+            {
+                activeInteractor.SendHapticImpulse(0.9f, 0.1f);
+            }
+        }
+    }
 }
