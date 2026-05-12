@@ -1,7 +1,7 @@
-// WheelNut.cs
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class WheelNut : MonoBehaviour, IDrillable 
 {
@@ -11,37 +11,66 @@ public class WheelNut : MonoBehaviour, IDrillable
     [Header("Settings")]
     public float unscrewTimeRequired = 0.8f; 
     
-    public delegate void WheelUnlockedAction();
-    public event WheelUnlockedAction OnWheelUnlocked;
+    // --- Define the Events ---
+    public delegate void WheelAction();
+    public event WheelAction OnWheelUnlocked;
+    public event WheelAction OnWheelLocked;
 
     private float currentTimer = 0f;
-    private bool isUnscrewed = false;
+    public bool isLocked = true;
 
     public void ProgressDrilling(float deltaTime)
     {
-        if (isUnscrewed) return;
-
-        currentTimer += deltaTime;
-
-        if (currentTimer >= unscrewTimeRequired)
+        bool isSocketed = false;
+        foreach (var interactor in wheelInteractable.interactorsSelecting)
         {
-            UnlockWheel();
+            if (interactor is XRSocketInteractor)
+            {
+                isSocketed = true;
+                break;
+            }
+        }
+
+        if (isLocked)
+        {
+            currentTimer += deltaTime;
+            if (currentTimer >= unscrewTimeRequired)
+            {
+                UnlockWheel();
+            }
+        }
+        else if (isSocketed)
+        {
+            currentTimer += deltaTime;
+            if (currentTimer >= unscrewTimeRequired)
+            {
+                LockWheel();
+            }
         }
     }
 
     void UnlockWheel()
     {
-        isUnscrewed = true;
+        isLocked = false;
+        currentTimer = 0;
         
         wheelInteractable.interactionLayers = InteractionLayerMask.GetMask("Default");
         OnWheelUnlocked?.Invoke();
     }
 
-    public void ResetNut()
+    void LockWheel()
     {
-        isUnscrewed = false;
+        isLocked = true;
         currentTimer = 0;
         
+        wheelInteractable.interactionLayers = InteractionLayerMask.GetMask("LockedWheel");
+        OnWheelLocked?.Invoke();
+    }
+
+    public void ResetNut()
+    {
+        isLocked = true;
+        currentTimer = 0;
         wheelInteractable.interactionLayers = InteractionLayerMask.GetMask("LockedWheel");
     }
 }

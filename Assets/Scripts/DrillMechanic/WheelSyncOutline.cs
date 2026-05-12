@@ -8,8 +8,7 @@ public class WheelSyncOutline : MonoBehaviour
     private WheelNut nut;
     private AudioSource audioSource;
 
-    [Header("Target Renderers (Performance Optimized)")]
-    [Tooltip("Drag ONLY the specific child objects that have the outline material here.")]
+    [Header("Target Renderers")]
     public Renderer[] outlineRenderers; 
 
     [Header("Feedback Settings")]
@@ -28,35 +27,50 @@ public class WheelSyncOutline : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
 
         propertyBlock = new MaterialPropertyBlock();
-        
         outlineColorId = Shader.PropertyToID("_outlineColor"); 
     }
 
     private void Start()
     {
         nut.OnWheelUnlocked += OnNutUnlocked;
+        nut.OnWheelLocked += OnNutLocked;
         ResetOutlines();
     }
 
     private void OnDestroy()
     {
-        if (nut != null) nut.OnWheelUnlocked -= OnNutUnlocked;
+        if (nut != null) 
+        {
+            nut.OnWheelUnlocked -= OnNutUnlocked;
+            nut.OnWheelLocked -= OnNutLocked;
+        }
     }
 
     private void OnNutUnlocked()
     {
+        // Physical 'pop' outwards
         transform.localPosition += Vector3.right * 0.05f;
-        
         ApplyOutlineColor(unlockedColor);
-        
-        if (unlockSparks != null) unlockSparks.Play();
-        if (unlockSound != null) audioSource.PlayOneShot(unlockSound);
+        TriggerVFX();
+    }
+
+    private void OnNutLocked()
+    {
+        transform.localPosition = Vector3.zero;
+        ApplyOutlineColor(lockedColor);
+        TriggerVFX();
     }
 
     public void ResetOutlines()
     {
         nut.ResetNut();
         ApplyOutlineColor(lockedColor);
+    }
+
+    private void TriggerVFX()
+    {
+        if (unlockSparks != null) unlockSparks.Play();
+        if (unlockSound != null) audioSource.PlayOneShot(unlockSound);
     }
 
     private void ApplyOutlineColor(Color color)
